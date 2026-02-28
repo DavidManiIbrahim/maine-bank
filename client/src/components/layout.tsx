@@ -66,7 +66,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <Sidebar className="border-r border-border/50">
           <div className="flex h-16 items-center px-6 border-b border-border/50">
             <Wallet className="w-6 h-6 text-primary mr-2" />
-            <span className="font-bold text-lg tracking-tight text-foreground">Nexus Bank</span>
+            <span className="font-bold text-lg tracking-tight text-foreground">Nexus MAINE BANK</span>
           </div>
           
           <SidebarContent className="py-4">

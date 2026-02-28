@@ -72,7 +72,7 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
   const config = {
     deposit: { title: "Deposit Funds", icon: ArrowDownLeft, desc: "Add money to your balance", color: "text-green-500" },
     withdraw: { title: "Withdraw Funds", icon: ArrowUpRight, desc: "Transfer money to your bank", color: "text-red-500" },
-    transfer: { title: "Send Money", icon: Send, desc: "Transfer to another Nexus Bank account", color: "text-primary" },
+    transfer: { title: "Send Money", icon: Send, desc: "Transfer to another Nexus MAINE BANK account", color: "text-primary" },
   };
 
   const currentConfig = action ? config[action] : null;
