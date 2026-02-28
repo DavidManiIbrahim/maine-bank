@@ -1,0 +1,212 @@
+Alright oni chan 😌 let’s build something serious.
+
+Here’s a **high-quality, production-level prompt** you can paste into an AI builder like v0, Lovable, Bolt, Replit AI, or any fullstack generator.
+
+---
+
+## 🚀 FULLSTACK BANKING APP – MASTER BUILD PROMPT
+
+Build a production-ready fullstack digital banking web application with secure authentication, role-based access control, real-time transactions, and an admin dashboard.
+
+### 🏗️ Tech Stack Requirements
+
+* Frontend: React + TypeScript + Tailwind CSS
+* Backend: Node.js + Express
+* Database: PostgreSQL
+* ORM: Prisma
+* Authentication: JWT with HTTP-only cookies
+* Password hashing: bcrypt
+* State management: React Query or Zustand
+* Form validation: Zod
+* Deployment-ready structure
+* Environment variables for secrets
+* Clean folder architecture
+
+---
+
+## 👤 User Roles
+
+### 1. Customer
+
+* Register and login securely
+* View account balance
+* View transaction history
+* Transfer money to another user
+* Deposit funds (simulation only)
+* Withdraw funds (simulation only)
+* Update profile
+* Logout securely
+
+### 2. Admin
+
+* View all users
+* Freeze or unfreeze accounts
+* View all transactions
+* Approve flagged transfers
+* Dashboard analytics:
+
+  * Total users
+  * Total deposits
+  * Total withdrawals
+  * Total system balance
+
+---
+
+## 🔐 Security Requirements
+
+* Hash passwords using bcrypt
+* JWT stored in HTTP-only cookies
+* Input validation using Zod
+* Prevent negative balances
+* Prevent transfers exceeding available balance
+* Protect all routes using middleware
+* Implement role-based authorization middleware
+* Rate limit login endpoint
+* Basic transaction logging system
+
+---
+
+## 💳 Core Features
+
+### Authentication
+
+* Register
+* Login
+* Logout
+* Refresh token mechanism
+
+### Banking Features
+
+* Create account automatically upon registration
+* Each user gets:
+
+  * Unique account number
+  * Balance field
+* Transfer between accounts:
+
+  * Atomic database transaction
+  * Record both debit and credit
+* Transaction history page:
+
+  * Filter by type
+  * Pagination
+
+### Transactions Table Fields
+
+* id
+* senderId
+* receiverId
+* amount
+* type (deposit | withdrawal | transfer)
+* status (pending | completed | failed)
+* createdAt
+
+---
+
+## 🎨 UI Requirements
+
+* Clean modern dashboard UI
+* Sidebar navigation
+* Cards for balance overview
+* Table for transaction history
+* Modal for transfers
+* Responsive design
+* Loading states
+* Error handling UI
+* Toast notifications
+
+---
+
+## 🧠 Bonus Advanced Features (Optional but Recommended)
+
+* Two-factor authentication via email OTP simulation
+* Email notification simulation
+* Dark mode toggle
+* Activity log panel
+* Suspicious activity detection logic
+* Account freeze logic
+* Real-time balance update using WebSockets
+
+---
+
+## 📁 Folder Structure
+
+Follow scalable architecture:
+
+```
+/client
+  /components
+  /pages
+  /hooks
+  /services
+/server
+  /controllers
+  /routes
+  /middlewares
+  /prisma
+  /utils
+```
+
+---
+
+## 📌 Database Schema Requirements
+
+Users table:
+
+* id
+* fullName
+* email (unique)
+* password
+* role (customer | admin)
+* isFrozen
+* createdAt
+
+Accounts table:
+
+* id
+* userId
+* accountNumber
+* balance
+* createdAt
+
+Transactions table:
+
+* id
+* senderId
+* receiverId
+* amount
+* type
+* status
+* createdAt
+
+---
+
+## 🧪 Testing
+
+* Include sample seeded admin account
+* Seed sample customers
+* Add sample transaction records
+
+---
+
+## 📊 Deliverables
+
+* Fully working backend
+* Fully working frontend
+* API documentation
+* Environment setup guide
+* README with setup instructions
+* Example .env file
+* Prisma migration files
+
+---
+
+If you want, I can now:
+
+* 🔥 Simplify it for a hackathon version
+* 🏦 Make it microfinance focused for Nigeria
+* 💰 Turn it into a fintech startup MVP
+* 📱 Convert it into a mobile banking React Native version
+* 🧠 Add AI fraud detection logic
+
+Say the word, oni chan. Let’s build something that actually slaps 💻🚀
