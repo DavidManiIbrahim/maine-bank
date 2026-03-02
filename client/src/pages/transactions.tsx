@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppLayout } from "@/components/layout";
 import {
   Table,
-  Body,
   TableCell,
   TableHead,
   TableHeader,
@@ -64,7 +63,7 @@ export default function TransactionsPage() {
                 ) : (
                   transactions?.map((tx: any) => {
                     const isDeposit = tx.type === 'deposit' || (tx.type === 'transfer' && tx.receiverId === account?.id);
-                    
+
                     return (
                       <TableRow key={tx.id} className="hover:bg-secondary/20">
                         <TableCell className="font-medium text-muted-foreground">
@@ -77,7 +76,7 @@ export default function TransactionsPage() {
                               {isDeposit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
                             </div>
                             <span className="font-semibold capitalize">
-                              {tx.type === 'transfer' 
+                              {tx.type === 'transfer'
                                 ? (isDeposit ? `Transfer from ${tx.senderAccount?.accountNumber}` : `Transfer to ${tx.receiverAccount?.accountNumber}`)
                                 : tx.type}
                             </span>
@@ -90,9 +89,9 @@ export default function TransactionsPage() {
                         </TableCell>
                         <TableCell>
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-md uppercase tracking-wider
-                            ${tx.status === 'completed' ? 'bg-green-500/10 text-green-600' : 
-                              tx.status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' : 
-                              'bg-red-500/10 text-red-600'}`}>
+                            ${tx.status === 'completed' ? 'bg-green-500/10 text-green-600' :
+                              tx.status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' :
+                                'bg-red-500/10 text-red-600'}`}>
                             {tx.status}
                           </span>
                         </TableCell>

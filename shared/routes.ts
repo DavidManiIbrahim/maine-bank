@@ -52,6 +52,14 @@ export const api = {
         200: z.custom<typeof accounts.$inferSelect>(),
         404: errorSchemas.notFound,
       }
+    },
+    lookup: {
+      method: 'GET' as const,
+      path: '/api/accounts/lookup' as const,
+      responses: {
+        200: z.object({ fullName: z.string(), accountNumber: z.string() }),
+        404: errorSchemas.notFound,
+      }
     }
   },
   transactions: {

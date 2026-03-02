@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
   Send,
   CreditCard,
   History,
@@ -54,7 +54,7 @@ export default function DashboardPage() {
                   </div>
                   <CreditCard className="w-10 h-10 text-white/50" />
                 </div>
-                
+
                 <div className="relative z-10 flex justify-between items-end mt-8">
                   <div>
                     <p className="text-indigo-200 text-sm font-medium">Account Number</p>
@@ -72,11 +72,11 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="grid grid-rows-3 gap-3">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-full rounded-2xl flex justify-start items-center px-6 hover:border-primary/50 hover:bg-primary/5 group transition-all"
               onClick={() => setAction("transfer")}
-              disabled={user?.isFrozen}
+              disabled={user?.isFrozen ?? false}
             >
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                 <Send className="w-5 h-5 text-primary" />
@@ -87,11 +87,11 @@ export default function DashboardPage() {
               </div>
             </Button>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-full rounded-2xl flex justify-start items-center px-6 hover:border-green-500/50 hover:bg-green-500/5 group transition-all"
               onClick={() => setAction("deposit")}
-              disabled={user?.isFrozen}
+              disabled={user?.isFrozen ?? false}
             >
               <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                 <ArrowDownLeft className="w-5 h-5 text-green-500" />
@@ -102,11 +102,11 @@ export default function DashboardPage() {
               </div>
             </Button>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-full rounded-2xl flex justify-start items-center px-6 hover:border-red-500/50 hover:bg-red-500/5 group transition-all"
               onClick={() => setAction("withdraw")}
-              disabled={user?.isFrozen || Number(account?.balance) <= 0}
+              disabled={(user?.isFrozen ?? false) || Number(account?.balance) <= 0}
             >
               <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                 <ArrowUpRight className="w-5 h-5 text-red-500" />
@@ -130,7 +130,7 @@ export default function DashboardPage() {
               <a href="/transactions">View All</a>
             </Button>
           </div>
-          
+
           <div className="divide-y divide-border/50">
             {loadingTx ? (
               Array(3).fill(0).map((_, i) => (
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             ) : (
               recentTx.map((tx: any) => {
                 const isDeposit = tx.type === 'deposit' || (tx.type === 'transfer' && tx.receiverId === account?.id);
-                
+
                 return (
                   <div key={tx.id} className="p-4 sm:p-6 flex items-center justify-between hover:bg-secondary/30 transition-colors">
                     <div className="flex items-center gap-4">
@@ -166,7 +166,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <p className="font-semibold text-foreground capitalize">
-                          {tx.type === 'transfer' 
+                          {tx.type === 'transfer'
                             ? (isDeposit ? `Transfer from ${tx.senderAccount?.accountNumber}` : `Transfer to ${tx.receiverAccount?.accountNumber}`)
                             : tx.type}
                         </p>
@@ -180,9 +180,9 @@ export default function DashboardPage() {
                         {isDeposit ? '+' : '-'}{formatCurrency(tx.amount)}
                       </p>
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize
-                        ${tx.status === 'completed' ? 'bg-green-500/10 text-green-600' : 
-                          tx.status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' : 
-                          'bg-red-500/10 text-red-600'}`}>
+                        ${tx.status === 'completed' ? 'bg-green-500/10 text-green-600' :
+                          tx.status === 'pending' ? 'bg-yellow-500/10 text-yellow-600' :
+                            'bg-red-500/10 text-red-600'}`}>
                         {tx.status}
                       </span>
                     </div>
@@ -194,9 +194,9 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <TransactionDialog 
-        action={action} 
-        onClose={() => setAction(null)} 
+      <TransactionDialog
+        action={action}
+        onClose={() => setAction(null)}
       />
     </AppLayout>
   );

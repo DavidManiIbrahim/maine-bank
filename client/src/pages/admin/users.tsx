@@ -72,12 +72,12 @@ export default function AdminUsersPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant={u.role === 'admin' ? "default" : "secondary"} className="uppercase tracking-wider text-[10px]">
-                          {u.role === 'admin' ? <ShieldCheck className="w-3 h-3 mr-1"/> : null}
+                          {u.role === 'admin' ? <ShieldCheck className="w-3 h-3 mr-1" /> : null}
                           {u.role}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {format(new Date(u.createdAt), 'MMM dd, yyyy')}
+                        {u.createdAt ? format(new Date(u.createdAt), 'MMM dd, yyyy') : 'Unknown'}
                       </TableCell>
                       <TableCell>
                         {u.isFrozen ? (
@@ -97,8 +97,8 @@ export default function AdminUsersPage() {
                             <span className="text-sm text-muted-foreground">
                               {u.isFrozen ? 'Unfreeze' : 'Freeze'}
                             </span>
-                            <Switch 
-                              checked={u.isFrozen}
+                            <Switch
+                              checked={u.isFrozen ?? false}
                               disabled={toggleFreeze.isPending}
                               onCheckedChange={(checked) => toggleFreeze.mutate({ id: u.id, isFrozen: checked })}
                             />

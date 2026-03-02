@@ -28,7 +28,7 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   const PgSessionStore = pgSession(session);
-  
+
   app.use(session({
     store: new PgSessionStore({
       pool,
@@ -82,7 +82,7 @@ export async function registerRoutes(
       }
       const hashedPassword = await bcrypt.hash(input.password, 10);
       const user = await storage.createUser({ ...input, password: hashedPassword });
-      
+
       // Generate account number
       const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
       await storage.createAccount({ userId: user.id, accountNumber });
@@ -118,6 +118,24 @@ export async function registerRoutes(
     const account = await storage.getAccountByUserId((req.user as any).id);
     if (!account) return res.status(404).json({ message: "Account not found" });
     res.json(account);
+  });
+
+  app.get(api.accounts.lookup.path, requireAuth, async (req, res) => {
+    const accountNumber = req.query.accountNumber as string;
+    if (!accountNumber) return res.status(400).json({ message: "Account number is required" });
+
+    const account = await storage.getAccountByNumber(accountNumber);
+    if (!account) return res.status(404).json({ message: "Account not found" });
+
+    // Only return safe public info (Full name & Account number)
+    // Needs user relation, fetching it
+    const user = await storage.getUser(account.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      fullName: user.fullName,
+      accountNumber: account.accountNumber,
+    });
   });
 
   // Transaction Routes
@@ -193,7 +211,7 @@ export async function registerRoutes(
   app.patch(api.admin.toggleFreeze.path, requireAdmin, async (req, res) => {
     try {
       const input = api.admin.toggleFreeze.input.parse(req.body);
-      const user = await storage.updateUserFreeze(parseInt(req.params.id), input.isFrozen);
+      const user = await storage.updateUserFreeze(parseInt(req.params.id as string), input.isFrozen);
       res.json(user);
     } catch (err) {
       res.status(400).json({ message: "Invalid request" });
@@ -208,11 +226,11 @@ export async function registerRoutes(
   app.get(api.admin.stats.path, requireAdmin, async (req, res) => {
     const users = await storage.getAllUsers();
     const txs = await storage.getAllTransactions();
-    
+
     let totalDeposits = 0;
     let totalWithdrawals = 0;
     let systemBalance = 0;
-    
+
     for (const tx of txs) {
       if (tx.type === 'deposit') totalDeposits += parseFloat(tx.amount);
       if (tx.type === 'withdrawal') totalWithdrawals += parseFloat(tx.amount);
@@ -245,7 +263,7 @@ export async function registerRoutes(
       await storage.createAccount({ userId: admin.id, accountNumber: '0000000000' });
     }
   }
-  
+
   seed().catch(console.error);
 
   return httpServer;

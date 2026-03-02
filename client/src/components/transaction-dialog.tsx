@@ -19,8 +19,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, ArrowDownLeft, Send } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, Send, UserRound, AlertCircle } from "lucide-react";
 import { useDeposit, useWithdraw, useTransfer } from "@/hooks/use-transactions";
+import { useAccountLookup } from "@/hooks/use-accounts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ActionType = "deposit" | "withdraw" | "transfer";
 
@@ -54,15 +56,18 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
     },
   });
 
+  const accountNumberValue = form.watch("receiverAccountNumber" as any);
+  const { data: recipientInfo, isLoading: isLookingUp, isError: lookupFailed } = useAccountLookup(accountNumberValue as string);
+
   const onSubmit = (values: z.infer<typeof schema>) => {
     if (action === "deposit") {
       deposit.mutate({ amount: values.amount }, { onSuccess: onClose });
     } else if (action === "withdraw") {
       withdraw.mutate({ amount: values.amount }, { onSuccess: onClose });
     } else if (action === "transfer" && 'receiverAccountNumber' in values) {
-      transfer.mutate({ 
-        amount: values.amount, 
-        receiverAccountNumber: values.receiverAccountNumber 
+      transfer.mutate({
+        amount: values.amount,
+        receiverAccountNumber: (values as any).receiverAccountNumber
       }, { onSuccess: onClose });
     }
   };
@@ -95,20 +100,54 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
             {isTransfer && (
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="receiverAccountNumber"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Recipient Account Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. ACCT-12345678" className="rounded-xl h-12 bg-secondary/50" {...field} />
+                      <Input placeholder="e.g. 1234567890" className="rounded-xl h-12 bg-secondary/50" {...field} />
                     </FormControl>
+
+                    {accountNumberValue?.length >= 5 && (
+                      <div className="mt-2 p-3 rounded-xl bg-secondary/30 flex items-center gap-3">
+                        {isLookingUp ? (
+                          <>
+                            <Skeleton className="w-8 h-8 rounded-full" />
+                            <div className="space-y-1">
+                              <Skeleton className="h-3 w-24" />
+                              <Skeleton className="h-2 w-16" />
+                            </div>
+                          </>
+                        ) : recipientInfo ? (
+                          <>
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                              <UserRound className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold leading-none">{recipientInfo.fullName}</p>
+                              <p className="text-xs text-muted-foreground mt-1">Ready to receive</p>
+                            </div>
+                          </>
+                        ) : lookupFailed ? (
+                          <>
+                            <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+                              <AlertCircle className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-red-500 leading-none">Account not found</p>
+                              <p className="text-xs text-muted-foreground mt-1">Please check the number</p>
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
-            
+
             <FormField
               control={form.control}
               name="amount"
@@ -118,12 +157,12 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
                   <FormControl>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        placeholder="0.00" 
-                        className="rounded-xl h-14 pl-8 text-lg font-semibold bg-secondary/50" 
-                        {...field} 
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="rounded-xl h-14 pl-8 text-lg font-semibold bg-secondary/50"
+                        {...field}
                       />
                     </div>
                   </FormControl>
@@ -132,8 +171,8 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
               )}
             />
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-12 rounded-xl text-md font-semibold"
               disabled={isPending}
             >
