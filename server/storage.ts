@@ -8,17 +8,17 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUserFreeze(id: number, isFrozen: boolean): Promise<User>;
-  
+
   createAccount(account: InsertAccount): Promise<Account>;
   getAccountByUserId(userId: number): Promise<Account | undefined>;
   getAccountByNumber(accountNumber: string): Promise<Account | undefined>;
-  
+
   createTransaction(tx: InsertTransaction): Promise<Transaction>;
   updateTransactionStatus(id: number, status: string): Promise<Transaction>;
-  
+
   getTransactionsForAccount(accountId: number): Promise<Transaction[]>;
   getAllTransactions(): Promise<Transaction[]>;
-  
+
   // Atomic transfer
   executeTransfer(senderAccountId: number, receiverAccountId: number, amount: string): Promise<Transaction>;
   executeDeposit(accountId: number, amount: string): Promise<Transaction>;
@@ -100,7 +100,7 @@ export class DatabaseStorage implements IStorage {
     return await db.transaction(async (tx) => {
       const [sender] = await tx.select().from(accounts).where(eq(accounts.id, senderAccountId));
       const [receiver] = await tx.select().from(accounts).where(eq(accounts.id, receiverAccountId));
-      
+
       if (!sender || !receiver) throw new Error("Account not found");
       if (parseFloat(sender.balance) < parseFloat(amount)) throw new Error("Insufficient funds");
 
@@ -112,8 +112,8 @@ export class DatabaseStorage implements IStorage {
         status: 'completed'
       }).returning();
 
-      await tx.update(accounts).set({ balance: sql`${accounts.balance} - ${amount}::numeric` }).where(eq(accounts.id, senderAccountId));
-      await tx.update(accounts).set({ balance: sql`${accounts.balance} + ${amount}::numeric` }).where(eq(accounts.id, receiverAccountId));
+      await tx.update(accounts).set({ balance: sql`${accounts.balance} - ${amount}` }).where(eq(accounts.id, senderAccountId));
+      await tx.update(accounts).set({ balance: sql`${accounts.balance} + ${amount}` }).where(eq(accounts.id, receiverAccountId));
 
       return transaction;
     });
@@ -128,7 +128,7 @@ export class DatabaseStorage implements IStorage {
         status: 'completed'
       }).returning();
 
-      await tx.update(accounts).set({ balance: sql`${accounts.balance} + ${amount}::numeric` }).where(eq(accounts.id, accountId));
+      await tx.update(accounts).set({ balance: sql`${accounts.balance} + ${amount}` }).where(eq(accounts.id, accountId));
 
       return transaction;
     });
@@ -147,7 +147,7 @@ export class DatabaseStorage implements IStorage {
         status: 'completed'
       }).returning();
 
-      await tx.update(accounts).set({ balance: sql`${accounts.balance} - ${amount}::numeric` }).where(eq(accounts.id, accountId));
+      await tx.update(accounts).set({ balance: sql`${accounts.balance} - ${amount}` }).where(eq(accounts.id, accountId));
 
       return transaction;
     });

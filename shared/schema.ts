@@ -1,34 +1,34 @@
-import { pgTable, text, serial, integer, boolean, timestamp, numeric } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   role: text("role").notNull().default('customer'), // 'customer' | 'admin'
-  isFrozen: boolean("is_frozen").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  isFrozen: integer("is_frozen", { mode: "boolean" }).default(false),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(new Date()),
 });
 
-export const accounts = pgTable("accounts", {
-  id: serial("id").primaryKey(),
+export const accounts = sqliteTable("accounts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull().references(() => users.id),
   accountNumber: text("account_number").notNull().unique(),
-  balance: numeric("balance", { precision: 12, scale: 2 }).notNull().default('0'),
-  createdAt: timestamp("created_at").defaultNow(),
+  balance: text("balance").notNull().default('0'),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(new Date()),
 });
 
-export const transactions = pgTable("transactions", {
-  id: serial("id").primaryKey(),
+export const transactions = sqliteTable("transactions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   senderId: integer("sender_id").references(() => accounts.id), // null for deposits
   receiverId: integer("receiver_id").references(() => accounts.id), // null for withdrawals
-  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  amount: text("amount").notNull(),
   type: text("type").notNull(), // 'deposit' | 'withdrawal' | 'transfer'
   status: text("status").notNull().default('pending'), // 'pending' | 'completed' | 'failed'
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(new Date()),
 });
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -72,7 +72,7 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertAccount = z.infer<typeof insertAccountSchema>;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 
-export type TransactionWithType = Transaction & { 
+export type TransactionWithType = Transaction & {
   senderAccount?: Account | null,
-  receiverAccount?: Account | null 
+  receiverAccount?: Account | null
 };

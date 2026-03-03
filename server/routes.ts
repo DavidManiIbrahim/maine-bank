@@ -6,11 +6,13 @@ import { z } from "zod";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import pgSession from "connect-pg-simple";
-import { db, pool } from "./db";
+import sqlite3Store from "connect-sqlite3";
+import { db } from "./db";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+
+const SQLiteStore = sqlite3Store(session);
 
 // Helper to check authentication
 function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -27,13 +29,12 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  const PgSessionStore = pgSession(session);
-
   app.use(session({
-    store: new PgSessionStore({
-      pool,
-      createTableIfMissing: true
-    }),
+    store: new SQLiteStore({
+      db: "sessions.db",
+      dir: "./",
+      concurrentDB: true
+    }) as any,
     secret: process.env.SESSION_SECRET || 'dev_secret',
     resave: false,
     saveUninitialized: false,
