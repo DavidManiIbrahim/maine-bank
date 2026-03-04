@@ -33,7 +33,7 @@ export async function registerRoutes(
     store: new SQLiteStore({
       db: "sessions.db",
       dir: "./",
-      concurrentDB: true
+      concurrentDB: "true"
     }) as any,
     secret: process.env.SESSION_SECRET || 'dev_secret',
     resave: false,
