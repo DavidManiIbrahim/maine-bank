@@ -14,7 +14,10 @@ import bcrypt from "bcryptjs";
 import Flutterwave from "flutterwave-node-v3";
 import axios from "axios";
 
-const flw = new Flutterwave(process.env.CLIENT_ID!, process.env.Client_Secret!);
+const flw = new Flutterwave(
+  process.env.FLW_PUBLIC_KEY || process.env.CLIENT_ID || "",
+  process.env.FLW_SECRET_KEY || (process.env as any).Client_Secret || ""
+);
 
 const SQLiteStore = sqlite3Store(session);
 
@@ -229,7 +232,7 @@ export async function registerRoutes(
         payload,
         {
           headers: {
-            Authorization: `Bearer ${process.env.Client_Secret}`,
+            Authorization: `Bearer ${process.env.FLW_SECRET_KEY}`,
             "Content-Type": "application/json",
           },
         }
@@ -255,13 +258,18 @@ export async function registerRoutes(
         return res.redirect("/dashboard?payment=cancelled");
       }
 
-      const response = await flw.Transaction.verify({ id: transaction_id as string });
-      if (response.status === "success" && response.data.status === "successful") {
-        const tx = await storage.updateTransactionStatus(parseInt(tx_id as string), "completed");
-        return res.redirect("/dashboard?payment=success");
-      } else {
+      try {
+        const response = await flw.Transaction.verify({ id: transaction_id as string });
+        if (response.status === "success" && response.data.status === "successful") {
+          await storage.updateTransactionStatus(parseInt(tx_id as string), "completed");
+          return res.redirect("/dashboard?payment=success");
+        } else {
+          await storage.updateTransactionStatus(parseInt(tx_id as string), "failed");
+          return res.redirect("/dashboard?payment=failed");
+        }
+      } catch (e: any) {
         await storage.updateTransactionStatus(parseInt(tx_id as string), "failed");
-        return res.redirect("/dashboard?payment=failed");
+        return res.status(502).json({ message: e?.response?.data?.message || "Upstream verification failed" });
       }
     } catch (err: any) {
       res.status(400).json({ message: "Verification failed" });

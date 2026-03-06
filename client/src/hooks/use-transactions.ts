@@ -74,6 +74,7 @@ export function useDeposit() {
 
 export function useInitializeFlutterwave() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: z.infer<typeof api.transactions.initializeFlutterwave.input>) => {
@@ -89,7 +90,9 @@ export function useInitializeFlutterwave() {
       }
       return api.transactions.initializeFlutterwave.responses[200].parse(await res.json());
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: [api.accounts.myAccount.path] });
+      await queryClient.invalidateQueries({ queryKey: [api.transactions.listMy.path] });
       window.location.href = data.link;
     },
     onError: (error: Error) => {
