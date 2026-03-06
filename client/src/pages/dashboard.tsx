@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { useLocation } from "wouter";
 import {
   ArrowUpRight,
   ArrowDownLeft,
   Send,
   CreditCard,
   History,
-  TrendingUp
+  TrendingUp,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle
 } from "lucide-react";
 import { useMyAccount } from "@/hooks/use-accounts";
 import { useMyTransactions } from "@/hooks/use-transactions";
@@ -16,15 +20,45 @@ import { Card } from "@/components/ui/card";
 import { TransactionDialog } from "@/components/transaction-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppLayout } from "@/components/layout";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DashboardPage() {
   const { data: user } = useAuth();
   const { data: account, isLoading: loadingAccount } = useMyAccount();
   const { data: transactions, isLoading: loadingTx } = useMyTransactions();
   const [action, setAction] = useState<"deposit" | "withdraw" | "transfer" | null>(null);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+
+    if (paymentStatus === 'success') {
+      toast({
+        title: "Payment Successful",
+        description: "Your account has been funded successfully!",
+      });
+      // Clean up URL
+      window.history.replaceState({}, document.title, "/dashboard");
+    } else if (paymentStatus === 'failed') {
+      toast({
+        variant: "destructive",
+        title: "Payment Failed",
+        description: "Your transaction could not be processed.",
+      });
+      window.history.replaceState({}, document.title, "/dashboard");
+    } else if (paymentStatus === 'cancelled') {
+      toast({
+        title: "Payment Cancelled",
+        description: "You cancelled the payment process.",
+      });
+      window.history.replaceState({}, document.title, "/dashboard");
+    }
+  }, [toast]);
 
   const formatCurrency = (amount: string | number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amount));
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(Number(amount));
   };
 
   const recentTx = transactions?.slice(0, 5) || [];

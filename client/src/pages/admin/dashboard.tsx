@@ -9,7 +9,7 @@ export default function AdminDashboardPage() {
   const { data: stats, isLoading } = useAdminStats();
 
   const formatCurrency = (amount: string | number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amount));
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(Number(amount));
   };
 
   // Mock data for chart visualization
@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
                     axisLine={false} 
                     tickLine={false} 
                     tick={{fill: 'hsl(var(--muted-foreground))'}}
-                    tickFormatter={(value) => `$${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`}
+                    tickFormatter={(value) => `₦${value >= 1000 ? (value / 1000).toFixed(0) + 'k' : value}`}
                   />
                   <Tooltip 
                     cursor={{fill: 'hsl(var(--secondary))'}}

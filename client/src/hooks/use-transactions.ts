@@ -72,6 +72,32 @@ export function useDeposit() {
   });
 }
 
+export function useInitializeFlutterwave() {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (data: z.infer<typeof api.transactions.initializeFlutterwave.input>) => {
+      const res = await fetch(api.transactions.initializeFlutterwave.path, {
+        method: api.transactions.initializeFlutterwave.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Payment initialization failed");
+      }
+      return api.transactions.initializeFlutterwave.responses[200].parse(await res.json());
+    },
+    onSuccess: (data) => {
+      window.location.href = data.link;
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Payment Error", description: error.message });
+    },
+  });
+}
+
 export function useWithdraw() {
   const queryClient = useQueryClient();
   const { toast } = useToast();

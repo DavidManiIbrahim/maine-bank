@@ -64,7 +64,7 @@ export default function AuthPage() {
               <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
                 <Wallet className="w-8 h-8 text-indigo-300" />
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">Nexus MAINE BANK</h1>
+              <h1 className="text-3xl font-bold tracking-tight"> MAINE BANK</h1>
             </div>
             <h2 className="mt-16 text-4xl font-bold leading-tight font-display">
               The future of <br/> borderless banking.
@@ -75,7 +75,7 @@ export default function AuthPage() {
           </div>
           
           <div className="relative z-10 text-sm text-indigo-300">
-            © 2024 Nexus Financial Technologies
+            © 2024  Financial Technologies
           </div>
         </div>
 
@@ -87,7 +87,7 @@ export default function AuthPage() {
                 {isLogin ? "Welcome back" : "Create an account"}
               </h2>
               <p className="mt-2 text-muted-foreground">
-                {isLogin ? "Enter your credentials to access your account." : "Join Nexus MAINE BANK in just a few clicks."}
+                {isLogin ? "Enter your credentials to access your account." : "Join  MAINE BANK in just a few clicks."}
               </p>
             </div>
 

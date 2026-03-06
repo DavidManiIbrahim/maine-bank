@@ -17,7 +17,7 @@ export default function AdminTransactionsPage() {
   const { data: transactions, isLoading } = useAdminTransactions();
 
   const formatCurrency = (amount: string | number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(amount));
+    return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(Number(amount));
   };
 
   const getIcon = (type: string) => {

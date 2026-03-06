@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, ArrowDownLeft, Send, UserRound, AlertCircle } from "lucide-react";
-import { useDeposit, useWithdraw, useTransfer } from "@/hooks/use-transactions";
+import { ArrowUpRight, ArrowDownLeft, Send, UserRound, AlertCircle, CreditCard } from "lucide-react";
+import { useDeposit, useWithdraw, useTransfer, useInitializeFlutterwave } from "@/hooks/use-transactions";
 import { useAccountLookup } from "@/hooks/use-accounts";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -44,6 +44,7 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
   const deposit = useDeposit();
   const withdraw = useWithdraw();
   const transfer = useTransfer();
+  const initializeFlutterwave = useInitializeFlutterwave();
 
   const isTransfer = action === "transfer";
   const schema = isTransfer ? transferSchema : basicSchema;
@@ -61,7 +62,7 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
 
   const onSubmit = (values: z.infer<typeof schema>) => {
     if (action === "deposit") {
-      deposit.mutate({ amount: values.amount }, { onSuccess: onClose });
+      initializeFlutterwave.mutate({ amount: values.amount });
     } else if (action === "withdraw") {
       withdraw.mutate({ amount: values.amount }, { onSuccess: onClose });
     } else if (action === "transfer" && 'receiverAccountNumber' in values) {
@@ -72,12 +73,12 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
     }
   };
 
-  const isPending = deposit.isPending || withdraw.isPending || transfer.isPending;
+  const isPending = deposit.isPending || withdraw.isPending || transfer.isPending || initializeFlutterwave.isPending;
 
   const config = {
-    deposit: { title: "Deposit Funds", icon: ArrowDownLeft, desc: "Add money to your balance", color: "text-green-500" },
+    deposit: { title: "Deposit Funds", icon: ArrowDownLeft, desc: "Add money securely via Flutterwave", color: "text-green-500" },
     withdraw: { title: "Withdraw Funds", icon: ArrowUpRight, desc: "Transfer money to your bank", color: "text-red-500" },
-    transfer: { title: "Send Money", icon: Send, desc: "Transfer to another Nexus MAINE BANK account", color: "text-primary" },
+    transfer: { title: "Send Money", icon: Send, desc: "Transfer to another  MAINE BANK account", color: "text-primary" },
   };
 
   const currentConfig = action ? config[action] : null;
@@ -153,10 +154,10 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount ($)</FormLabel>
+                  <FormLabel>Amount (₦)</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₦</span>
                       <Input
                         type="number"
                         step="0.01"
@@ -173,10 +174,15 @@ export function TransactionDialog({ action, onClose }: TransactionDialogProps) {
 
             <Button
               type="submit"
-              className="w-full h-12 rounded-xl text-md font-semibold"
+              className="w-full h-12 rounded-xl text-md font-semibold gap-2"
               disabled={isPending}
             >
-              {isPending ? "Processing..." : `Confirm ${action}`}
+              {isPending ? "Processing..." : (
+                <>
+                  {action === 'deposit' && <CreditCard className="w-5 h-5" />}
+                  Confirm {action}
+                </>
+              )}
             </Button>
           </form>
         </Form>

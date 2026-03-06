@@ -14,6 +14,7 @@ export interface IStorage {
   getAccountByNumber(accountNumber: string): Promise<Account | undefined>;
 
   createTransaction(tx: InsertTransaction): Promise<Transaction>;
+  getTransaction(id: number): Promise<Transaction | undefined>;
   updateTransactionStatus(id: number, status: string): Promise<Transaction>;
 
   getTransactionsForAccount(accountId: number): Promise<Transaction[]>;
@@ -70,8 +71,24 @@ export class DatabaseStorage implements IStorage {
     return tx;
   }
 
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    const [tx] = await db.select().from(transactions).where(eq(transactions.id, id));
+    return tx;
+  }
+
   async updateTransactionStatus(id: number, status: string): Promise<Transaction> {
     const [tx] = await db.update(transactions).set({ status }).where(eq(transactions.id, id)).returning();
+    
+    // If status is updated to completed and it's a deposit, update balance
+    if (status === 'completed') {
+      const transaction = await this.getTransaction(id);
+      if (transaction && transaction.type === 'deposit' && transaction.receiverId) {
+        await db.update(accounts)
+          .set({ balance: sql`${accounts.balance} + ${transaction.amount}` })
+          .where(eq(accounts.id, transaction.receiverId));
+      }
+    }
+    
     return tx;
   }
 

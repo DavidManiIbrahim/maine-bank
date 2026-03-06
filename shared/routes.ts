@@ -88,6 +88,23 @@ export const api = {
         400: errorSchemas.badRequest,
       }
     },
+    initializeFlutterwave: {
+      method: 'POST' as const,
+      path: '/api/transactions/flutterwave/initialize' as const,
+      input: z.object({ amount: z.string() }),
+      responses: {
+        200: z.object({ link: z.string(), tx_ref: z.string() }),
+        400: errorSchemas.badRequest,
+      }
+    },
+    verifyFlutterwave: {
+      method: 'GET' as const,
+      path: '/api/transactions/flutterwave/verify' as const,
+      responses: {
+        200: z.object({ status: z.string(), transaction: z.custom<typeof transactions.$inferSelect>() }),
+        400: errorSchemas.badRequest,
+      }
+    },
     withdraw: {
       method: 'POST' as const,
       path: '/api/transactions/withdraw' as const,

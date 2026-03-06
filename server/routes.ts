@@ -11,6 +11,10 @@ import { db } from "./db";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import Flutterwave from "flutterwave-node-v3";
+import axios from "axios";
+
+const flw = new Flutterwave(process.env.CLIENT_ID!, process.env.Client_Secret!);
 
 const SQLiteStore = sqlite3Store(session);
 
@@ -183,6 +187,84 @@ export async function registerRoutes(
       res.status(201).json(tx);
     } catch (err: any) {
       res.status(400).json({ message: err.message || "Deposit failed" });
+    }
+  });
+
+  app.post(api.transactions.initializeFlutterwave.path, requireAuth, async (req, res) => {
+    try {
+      const input = api.transactions.initializeFlutterwave.input.parse(req.body);
+      const amount = parseFloat(input.amount);
+      if (isNaN(amount) || amount <= 0) return res.status(400).json({ message: "Invalid amount" });
+
+      const user = req.user as any;
+      const account = await storage.getAccountByUserId(user.id);
+      if (!account) return res.status(400).json({ message: "Account not found" });
+
+      // Create a pending transaction
+      const tx = await storage.createTransaction({
+        receiverId: account.id,
+        amount: amount.toString(),
+        type: 'deposit',
+        status: 'pending'
+      });
+
+      const payload = {
+        tx_ref: `MAINE-TX-${tx.id}-${Date.now()}`,
+        amount: amount,
+        currency: "NGN",
+        redirect_url: `${req.protocol}://${req.get('host')}${api.transactions.verifyFlutterwave.path}?tx_id=${tx.id}`,
+        customer: {
+          email: user.email,
+          name: user.fullName,
+        },
+        customizations: {
+          title: "MAINE BANK Deposit",
+          description: "Funding your account",
+          logo: "https://your-bank-logo.com/logo.png"
+        }
+      };
+
+      const response = await axios.post(
+        "https://api.flutterwave.com/v3/payments",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.Client_Secret}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.status === "success") {
+        res.json({ link: response.data.data.link, tx_ref: payload.tx_ref });
+      } else {
+        res.status(400).json({ message: "Flutterwave initialization failed" });
+      }
+    } catch (err: any) {
+      res.status(400).json({ message: err.message || "Payment initialization failed" });
+    }
+  });
+
+  app.get(api.transactions.verifyFlutterwave.path, async (req, res) => {
+    try {
+      const { transaction_id, tx_id, status } = req.query;
+      if (!tx_id) return res.status(400).json({ message: "Transaction ID missing" });
+
+      if (status === "cancelled") {
+        await storage.updateTransactionStatus(parseInt(tx_id as string), "failed");
+        return res.redirect("/dashboard?payment=cancelled");
+      }
+
+      const response = await flw.Transaction.verify({ id: transaction_id as string });
+      if (response.status === "success" && response.data.status === "successful") {
+        const tx = await storage.updateTransactionStatus(parseInt(tx_id as string), "completed");
+        return res.redirect("/dashboard?payment=success");
+      } else {
+        await storage.updateTransactionStatus(parseInt(tx_id as string), "failed");
+        return res.redirect("/dashboard?payment=failed");
+      }
+    } catch (err: any) {
+      res.status(400).json({ message: "Verification failed" });
     }
   });
 

@@ -70,7 +70,7 @@ export function useRegister() {
     },
     onSuccess: (user) => {
       queryClient.setQueryData([api.auth.me.path], user);
-      toast({ title: "Account created!", description: "Welcome to Nexus MAINE BANK." });
+      toast({ title: "Account created!", description: "Welcome to  MAINE BANK." });
       setLocation("/dashboard");
     },
     onError: (error: Error) => {
